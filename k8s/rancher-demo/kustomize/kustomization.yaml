@@ -1,0 +1,7 @@
+namespace: default
+resources:
+- deployment.yaml
+- service.yaml
+- ingress.yaml
+- certificate-letsencrypt-prod.yaml
+- issuer-letsencrypt-prod.yaml
