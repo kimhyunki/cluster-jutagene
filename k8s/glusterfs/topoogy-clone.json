@@ -1,0 +1,32 @@
+{
+    "clusters": [
+      {
+        "nodes": [
+          { "node": { "hostnames": { "manage": [ "pandora-tyan13" ], "storage": [ "10.10.102.31" ] }, "zone": 1 },
+           "devices": 
+            [ 
+              "/dev/sdb", 
+              "/dev/sdc",
+              "/dev/sdd"
+            ]
+           },
+          { "node": { "hostnames": { "manage": [ "pandora-tyan17" ], "storage": [ "10.10.102.32" ] }, "zone": 1 }, 
+          "devices":
+           [
+             "/dev/sdb",
+             "/dev/sdc",
+             "/dev/sdd"
+           ] 
+          },
+          { "node": { "hostnames": { "manage": [ "pandora-tyan18" ], "storage": [ "10.10.102.33" ] }, "zone": 1 },
+          "devices":
+          [
+            "/dev/sdb",
+            "/dev/sdc",
+            "/dev/sdd"
+          ] }
+        ]
+      }
+    ]
+  }
+  

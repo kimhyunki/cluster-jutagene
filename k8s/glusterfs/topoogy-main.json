@@ -1,0 +1,75 @@
+{
+    "clusters": [
+      {
+        "nodes": [
+          {
+            "node": {
+              "hostnames": {
+                "manage": [
+                  "pandora-assy-r102"
+                ],
+                "storage": [
+                  "10.10.100.31"
+                ]
+              },
+              "zone": 1
+            },
+            "devices": [
+              "/dev/sda",
+              "/dev/sdb",
+              "/dev/sdc",
+              "/dev/sdd",
+              "/dev/sde"
+            ]
+          },
+          {
+            "node": {
+              "hostnames": {
+                "manage": [
+                  "pandora-assy-r308"
+                ],
+                "storage": [
+                  "10.10.100.32"
+                ]
+              },
+              "zone": 1
+            },
+            "devices": [
+              "/dev/sda",
+              "/dev/sdb",
+              "/dev/sdc",
+              "/dev/sdd"
+            ]
+          },
+          {
+            "node": {
+              "hostnames": {
+                "manage": [
+                  "pandora-assy-r311"
+                ],
+                "storage": [
+                  "10.10.100.33"
+                ]
+              },
+              "zone": 1
+            },
+            "devices": [
+              "/dev/sda",
+              "/dev/sdb",
+              "/dev/sdc",
+              "/dev/sdd",
+              "/dev/sde",
+              "/dev/sdf",
+              "/dev/sdg",
+              "/dev/sdh",
+              "/dev/sdi",
+              "/dev/sdj",
+              "/dev/sdk",
+              "/dev/sdl"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  
