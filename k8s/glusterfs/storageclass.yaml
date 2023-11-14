@@ -1,0 +1,12 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: "gluster-heketi"
+provisioner: kubernetes.io/glusterfs
+parameters:
+  resturl: "http://10.43.18.31:8080"
+  restuser: "admin"
+  restuserkey: "admin"
+  volumeoptions: "ctime off"
+  volumetype: "replicate:3"
+allowVolumeExpansion: true
