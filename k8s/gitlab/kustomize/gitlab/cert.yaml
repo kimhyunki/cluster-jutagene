@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: git-juxtagene-com
+  namespace: gitlab
+spec:
+  secretName: git-juxtagene-com-tls
+  issuerRef:
+    name: letsencrypt-prod
+  commonName: git.juxtagene.com
+  dnsNames:
+  - git.juxtagene.com
