@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress
+  namespace: gitlab
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 10G
+spec:
+  tls:
+  - hosts:
+    - git.juxtagene.com
+    secretName: git-juxtagene-com-tls
+  rules:
+  - host: git.juxtagene.com
+    http:
+      paths:
+      - backend:
+          serviceName: gitlab
+          servicePort: 80
+        path: /

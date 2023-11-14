@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: redis
+  namespace: gitlab
+spec:
+  replicas: 1
+  selector:
+    name: redis
+  template:
+    metadata:
+      name: redis
+      labels:
+        name: redis
+    spec:
+      containers:
+        - name: redis
+          image: sameersbn/redis
+          ports:
+            - name: redis
+              containerPort: 6379
+          # volumeMounts:
+          #   - mountPath: /data
+          #     name: app-redis-pv
+          livenessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+      # volumes:
+      #   - name: app-redis-pv
+      #     persistentVolumeClaim:
+      #       claimName: app-redis-pvc
