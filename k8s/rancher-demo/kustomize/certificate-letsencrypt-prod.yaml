@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: www-juxtagene-com
+  namespace: default
+spec:
+  secretName: www-juxtagene-com-tls
+  issuerRef:
+    name: letsencrypt-prod
+  commonName: www.juxtagene.com
+  dnsNames:
+  - www.juxtagene.com
+  - juxtagene.com
+status:
+  conditions: []
