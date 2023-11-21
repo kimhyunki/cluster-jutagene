@@ -281,6 +281,14 @@ function k8s_install_rancher_demo() {
 
   $RANCHER_BIN kubectl apply -k k8s/rancher-demo/kustomize
 }
+
+function k8s_unnstall_rancher_demo() {
+  msg "${GREEN}#-k8s_unnstall_rancher_demo${NOFORMAT}"
+
+  $RANCHER_BIN kubectl delete -k k8s/rancher-demo/kustomize
+}
+
+
 ##
 # Print an error message to stderr.
 function _error() {
@@ -416,12 +424,45 @@ rancher_select_cluster() {
 function k8s_setting() {
   # sleep 20
   rancher_select_cluster
+  k8s_install_metallb
+  # k8s_uninstall_metallb
   # k8s_install_certmanager
   # k8s_install_rancher_demo
+  # k8s_unnstall_rancher_demo
   # k8s_install_glusterfs
-  k8s_install_gitlab
+  # k8s_install_gitlab
+  # k8s_uninstall_gitlab
   # k8s_install_docker_registry
   # k8s_install_rancher_demo
+
+}
+
+function k8s_install_metallb () {
+  msg "${GREEN}#-k8s_install_metallb${NOFORMAT}"
+
+  $RANCHER_BIN kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.11.0/manifests/namespace.yaml
+  $RANCHER_BIN kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.11.0/manifests/metallb.yaml
+  # $RANCHER_BIN kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+
+  $RANCHER_BIN kubectl apply -f k8s/metallb/configmap.yaml
+
+  NAMESPACE="metallb-system"
+
+  # $RANCHER_BIN project create ${NAMESPACE}
+  $RANCHER_BIN namespace move ${NAMESPACE} $($RANCHER_BIN project ls --format '{{.Project.ID}} {{.Project.Name}}' | grep ${NAMESPACE} | awk '{ print $1 }')
+
+}
+
+function k8s_uninstall_metallb () {
+  msg "${GREEN}#-k8s_uninstall_metallb${NOFORMAT}"
+
+  $RANCHER_BIN kubectl delete -f https://raw.githubusercontent.com/metallb/metallb/v0.11.0/manifests/metallb.yaml
+  $RANCHER_BIN kubectl delete -f https://raw.githubusercontent.com/metallb/metallb/v0.11.0/manifests/namespace.yaml
+  # $RANCHER_BIN kubectl delete secret -n metallb-system memberlist
+  $RANCHER_BIN kubectl delete -f k8s/metallb/configmap.yaml
+
+  NAMESPACE="metallb-system"
+  $RANCHER_BIN project rm  $($RANCHER_BIN project ls --format '{{.Project.ID}} {{.Project.Name}}' | grep ${NAMESPACE} | awk '{ print $1 }')
 
 }
 
@@ -436,6 +477,17 @@ function k8s_install_gitlab() {
   $RANCHER_BIN kubectl apply -k k8s/gitlab/kustomize/gitlab
   $RANCHER_BIN kubectl apply -k k8s/gitlab/kustomize/postgresql
   $RANCHER_BIN kubectl apply -k k8s/gitlab/kustomize/redis
+
+}
+
+function k8s_uninstall_gitlab () {
+  msg "${GREEN}#-k8s_uninstall_gitlab${NOFORMAT}"
+
+  $RANCHER_BIN kubectl delete -k k8s/gitlab/kustomize/gitlab
+  $RANCHER_BIN kubectl delete -k k8s/gitlab/kustomize/postgresql
+  $RANCHER_BIN kubectl delete -k k8s/gitlab/kustomize/redis
+
+  $RANCHER_BIN project rm  $($RANCHER_BIN project ls --format '{{.Project.ID}} {{.Project.Name}}' | grep gitlab | awk '{ print $1 }')
 
 }
 
