@@ -192,8 +192,24 @@ function maas_deploy_machines() {
   done
 }
 
+function maas_create_vm_machines() {
+  msg "${GREEN}#-maas_create_vm_machines${NOFORMAT}"
+
+  VM_CORES=4
+  VM_MEMORY=32
+  VM_STORAGE="30,50"
+  MACHINE_NUM=565
+
+  for ((i = 0; i < ${#array_pandora_machine_name[@]}; i++)); do
+    msg "\t${BLUE}##-${array_pandora_machine_name[$i]}${NOFORMAT}"
+    # echo "sudo maas ${MAAS_USER} vm-host compose ${MACHINE_NUM} ${array_pandora_machine_name[$i]} cores=${VM_CORES} memory=$(expr ${VM_MEMORY} '*' 1024) storage=${VM_STORAGE} hostname=${array_pandora_machine_name[$i]}"
+    sudo maas ${MAAS_USER} vm-host compose ${MACHINE_NUM} cores=${VM_CORES} memory=$(expr ${VM_MEMORY} '*' 1024) storage=${VM_STORAGE} hostname=${array_pandora_machine_name[$i]}
+  done
+}
+
 function maas_setting() {
   msg "${GREEN}#-maas_settings${NOFORMAT}"
+  maas_create_vm_machines
   maas_deploy_machines
 }
 
@@ -208,8 +224,6 @@ function host_ssh_keygen() {
 
 function rancher_status() {
   msg "${GREEN}#-rancher_status${NOFORMAT}"
-
-
 
   # API key for Rancher
   ENDPOINT="https://rancher.falinux.dev/v3"
@@ -425,15 +439,14 @@ function k8s_setting() {
   # sleep 20
   rancher_select_cluster
   k8s_install_metallb
+  k8s_install_certmanager
+  k8s_install_rancher_demo
+  k8s_install_glusterfs
+  k8s_install_gitlab
+  k8s_install_docker_registry
   # k8s_uninstall_metallb
-  # k8s_install_certmanager
-  # k8s_install_rancher_demo
   # k8s_unnstall_rancher_demo
-  # k8s_install_glusterfs
-  # k8s_install_gitlab
   # k8s_uninstall_gitlab
-  # k8s_install_docker_registry
-  # k8s_install_rancher_demo
 
 }
 
@@ -472,7 +485,6 @@ function k8s_install_gitlab() {
   # $RANCHER_BIN project create gitlab
   # $RANCHER_BIN namespace create gitlab
   $RANCHER_BIN namespace move gitlab $($RANCHER_BIN project ls --format '{{.Project.ID}} {{.Project.Name}}' | grep gitlab | awk '{ print $1 }')
-
 
   $RANCHER_BIN kubectl apply -k k8s/gitlab/kustomize/gitlab
   $RANCHER_BIN kubectl apply -k k8s/gitlab/kustomize/postgresql
@@ -733,6 +745,8 @@ EOF
 
   rm -rf ${DOCKER_INSTALL_SCRIPT}
 
+  sleep 5
+
 }
 
 function rancher_setting() {
@@ -745,29 +759,35 @@ function rancher_setting() {
 function wait_rancher_cluster() {
   msg "${GREEN}#-wait_rancher_cluster${NOFORMAT}"
 
-  output=$(./bin/rancher cluster ls --format "{{ .Cluster.Name }} {{ .Cluster.State }}")
+  # rancher context switch
+  $RANCHER_BIN context switch
 
-  cluster_name=()
-  cluster_state=()
+  # select cluster viriable
+  SELECT_CLUSTER=$($RANCHER_BIN cluster ls | grep '*' | awk '{ print $4 }')
 
-  # Loop through each line of the output
-  while IFS= read -r line; do
-    # Split each line by space and extract the name and state
-    read -r name state <<<"$line"
+  # print selected cluster
+  msg "SELECT_CLUSTER: ${RED}${SELECT_CLUSTER}${NOFORMAT}"
 
-    # Add the name and state to their respective arrays
-    cluster_names+=("$name")
-    cluster_states+=("$state")
-  done <<<"$output"
+  # user select yes or no
+  read -p "Is this Cluster you choise? (y/n) " _ANSWER
+  # if y then continue, else exit
+  if [ "${_ANSWER}" == "y" ]; then
+    msg "\tcontinue"
+  else
+    exit 1
+  fi
 
-  for ((i = 0; i < ${#cluster_name[@]}; i++)); do
-    msg "\t${BLUE}cluster_name ${cluster_name[$i]} cluster_state ${cluster_state[$i]}${NOFORMAT}"
-    if [ "${cluster_state[$i]}" == "active" ]; then
-      msg "\t${BLUE}cluster_name ${cluster_name[$i]} cluster_state ${cluster_state[$i]}${NOFORMAT}"
+  # select cluster status is active brake loop
+  while true; do
+    # get cluster state
+    cluster_status=$($RANCHER_BIN cluster ls --format "{{ .Cluster.Name }} {{ .Cluster.State }}" | grep ${SELECT_CLUSTER} | awk '{ print $2 }')
+    if [ "${cluster_status}" == "active" ]; then
+      msg "\t${BLUE}cluster_status ${cluster_status} wait 60 sec"
+      sleep 60
       break
     fi
+    sleep 5
   done
-
 }
 
 # rancher login
@@ -871,9 +891,9 @@ function main() {
   #-------------------------------------------------------------------------------
   # 잘 동작하는 셋
   pandora_machines_info_split
-  # maas_setting
-  # install_docker
-  # rancher_setting
+  maas_setting
+  install_docker
+  rancher_setting
   k8s_setting
   #-------------------------------------------------------------------------------
   # test set
