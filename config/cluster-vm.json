@@ -1,0 +1,39 @@
+{
+  "cluster_name": "b",
+  "node_count": 5,
+  "node_config": {
+      "instance_type": "t2.micro",
+      "region": "us-east-1"
+  },
+  "services": ["web", "database", "worker"],
+  "nodes": [
+      {
+          "hostname": "vm00",
+          "ipmi_mac": "xxxx",
+          "ipmi_ip": "xxxx",
+          "eth_ip": "10.10.100.90",
+          "ib_ip": "xxxx",
+          "ipmi_user": "root",
+          "ipmi_pass": "xxxxx"
+      },
+      {
+          "hostname": "vm01",
+          "ipmi_mac": "xxxx",
+          "ipmi_ip": "xxxx",
+          "eth_ip": "10.10.100.91",
+          "ib_ip": "xxxx",
+          "ipmi_user": "root",
+          "ipmi_pass": "xxxxx"
+      },
+      {
+          "hostname": "vm02",
+          "ipmi_mac": "yyyy",
+          "ipmi_ip": "yyyy",
+          "eth_ip": "10.10.100.92",
+          "ib_ip": "yyyy",
+          "ipmi_user": "root",
+          "ipmi_pass": "yyyyy"
+      }
+  ]
+}
+
