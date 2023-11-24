@@ -739,7 +739,6 @@ EOF
     ssh-keygen -f "$HOME/.ssh/known_hosts" -R "${array_pandora_machine_eth_ip[$i]}"
     ssh -o StrictHostKeyChecking=no ubuntu@${array_pandora_machine_eth_ip[$i]} "echo 'hello'"
     scp ${DOCKER_INSTALL_SCRIPT} ${SSH_USER}@${array_pandora_machine_eth_ip[$i]}:~/
-    ssh ${SSH_USER}@${array_pandora_machine_eth_ip[$i]} " sudo sed -i 's/archive.ubuntu.com/ftp.kaist.ac.kr/g' /etc/apt/sources.list"
     ssh ${SSH_USER}@${array_pandora_machine_eth_ip[$i]} "sudo ./${DOCKER_INSTALL_SCRIPT}"
   done
 
