@@ -6,6 +6,18 @@
       "region": "us-east-1"
   },
   "services": ["web", "database", "worker"],
+  "maas_infos": {
+        "maas_user": "falinux",
+        "machine_num": 565,
+        "vm_cores": 4,
+        "vm_memory": 32768,
+        "vm_boot_disk": 30,
+        "vm_storage": [
+            {
+                "size": 50
+            }
+        ]
+    },
   "nodes": [
       {
           "hostname": "vm00",
