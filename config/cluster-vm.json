@@ -7,7 +7,9 @@
   },
   "services": ["web", "database", "worker"],
   "maas_infos": {
+        "maas_url": "https://maas.falinux.dev:5443/MAAS/api/2.0/",
         "maas_user": "falinux",
+        "maas_pass": "",
         "machine_num": 565,
         "vm_cores": 4,
         "vm_memory": 32768,
@@ -24,6 +26,8 @@
           "ipmi_mac": "xxxx",
           "ipmi_ip": "xxxx",
           "eth_ip": "10.10.100.90",
+          "eth_interface": "enp5s0",
+          "eth_subnet": "10.10.100.10/24",
           "ib_ip": "xxxx",
           "ipmi_user": "root",
           "ipmi_pass": "xxxxx"
@@ -33,6 +37,8 @@
           "ipmi_mac": "xxxx",
           "ipmi_ip": "xxxx",
           "eth_ip": "10.10.100.91",
+          "eth_interface": "enp5s0",
+          "eth_subnet": "10.10.100.10/24",
           "ib_ip": "xxxx",
           "ipmi_user": "root",
           "ipmi_pass": "xxxxx"
@@ -42,6 +48,8 @@
           "ipmi_mac": "yyyy",
           "ipmi_ip": "yyyy",
           "eth_ip": "10.10.100.92",
+          "eth_interface": "enp5s0",
+          "eth_subnet": "10.10.100.10/24",
           "ib_ip": "yyyy",
           "ipmi_user": "root",
           "ipmi_pass": "yyyyy"
