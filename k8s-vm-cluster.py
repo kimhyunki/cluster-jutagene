@@ -3,46 +3,32 @@ import subprocess
 import time
 from termcolor import colored
 
-
-import asyncio
-
 import maas.client
-
-from maas.client import connect
-from maas.client.enum import NodeStatus
-# from maas.client.utils.async import asynchronous
-
 from maas.client import login
-
 import getpass
-
 
 # https://maas.github.io/python-libmaas/
 
 cluster_info = {}
 machine_to_system_id = {}  # 머신 이름을 시스템 ID로 매핑하는 딕셔너리
 
+
 def get_machine_status(system_id):
     """
     머신의 상태를 조회하는 함수
     """
-    print(colored("#-get_machine_status", 'green'))
+    print(colored("#-get_machine_status", "green"))
 
     global cluster_info
 
     maas_info = cluster_info.get("maas_infos", {})
 
     # MAAS command execute
-    maas_cmd = [
-        "sudo",
-        "maas", 
-        maas_info["maas_user"],
-        "machine",
-        "read",
-        system_id
-    ]
+    maas_cmd = ["sudo", "maas", maas_info["maas_user"], "machine", "read", system_id]
 
-    result = subprocess.run(maas_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    result = subprocess.run(
+        maas_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    )
 
     if "status_name" in result.stdout:
         try:
@@ -61,35 +47,44 @@ def get_machine_status(system_id):
 
     return None
 
+
 def maas_deploy_ubuntu(machine, system_id, nodes):
     """
     Ubuntu를 MAAS로 배포하는 함수
     """
-    print(colored("#-maas_deploy_ubuntu", 'green'))
+    print(colored("#-maas_deploy_ubuntu", "green"))
 
     global cluster_info
 
     # get nodes.get eth_interface
     for node in nodes:
-        if node.get("hostname", '') == machine:
-            eth_interface = node.get("eth_interface", '')
+        if node.get("hostname", "") == machine:
+            eth_interface = node.get("eth_interface", "")
 
     # get nic_id
     nic_id = subprocess.run(
         ["sudo", "maas", maas_info["maas_user"], "interfaces", "read", system_id],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
     ).stdout
 
     nic_id = json.loads(nic_id)[0]["id"]
 
     # get old_link_id
     old_link_id = subprocess.run(
-        ["sudo", "maas", maas_info["maas_user"], "interface", "read", system_id, nic_id],
+        [
+            "sudo",
+            "maas",
+            maas_info["maas_user"],
+            "interface",
+            "read",
+            system_id,
+            nic_id,
+        ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
     ).stdout
 
     old_link_id = json.loads(old_link_id)["links"][0]["id"]
@@ -114,17 +109,18 @@ def maas_deploy_ubuntu(machine, system_id, nodes):
 
     # subnet_id = json.loads(subnet_id)[0]["id"]
 
+
 def maas_deploy_mahcine():
     """
     MAAS로 머신 배포 및 상태 확인 함수
     """
-    print(colored("#-maas_deploy_machine", 'green'))
+    print(colored("#-maas_deploy_machine", "green"))
 
     global cluster_info
     global machine_to_system_id
 
-    cluster_name = cluster_info.get("cluster_name", '')
-    maas_info = cluster_info.get("maas_infos", {}) 
+    cluster_name = cluster_info.get("cluster_name", "")
+    maas_info = cluster_info.get("maas_infos", {})
     nodes = cluster_info.get("nodes", [])
 
     # 머신 이름을 시스템 ID로 매핑하는 딕셔너리가 비어있으면 종료
@@ -144,7 +140,7 @@ def maas_deploy_mahcine():
             machine_status = get_machine_status(system_id)
             if machine_status != "Deployed":
                 all_deployed = False
-            
+
             if machine_status == "Ready":
                 maas_deploy_ubuntu(machine, system_id, nodes)
 
@@ -155,9 +151,8 @@ def maas_deploy_mahcine():
         time.sleep(10)
 
 
-
 def get_cluster_info(cluster_config_file):
-    print(colored("#-get_cluster_info", 'green'))
+    print(colored("#-get_cluster_info", "green"))
 
     global cluster_info
 
@@ -165,6 +160,7 @@ def get_cluster_info(cluster_config_file):
         # JSON 파일 열기
         with open(cluster_config_file, "r") as f:
             cluster_info = json.load(f)
+            print_cluster_info()
 
     except json.JSONDecodeError as e:
         print(f"cluster info not parse: {e}")
@@ -174,7 +170,7 @@ def get_maas_machine_info():
     """
     MAAS로 생성된 머신 정보를 읽어오는 함수
     """
-    print(colored("#-get_maas_machine_info", 'green'))
+    print(colored("#-get_maas_machine_info", "green"))
 
     global cluster_info
 
@@ -182,59 +178,54 @@ def get_maas_machine_info():
     nodes = cluster_info.get("nodes", [])
 
     # MAAS command execute
-    maas_cmd = [
-        "sudo",
-        "maas", 
-        maas_info["maas_user"],
-        "machines",
-        "read"
-    ]
+    maas_cmd = ["sudo", "maas", maas_info["maas_user"], "machines", "read"]
 
-    result = subprocess.run(maas_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    result = subprocess.run(
+        maas_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    )
+
 
 def maas_create_vm_machines():
     """
     MAAS로 가상 머신을 생성하는 함수
     """
-    print(colored("#-maas_create_vm_machines", 'green'))
+    print(colored("#-maas_create_vm_machines", "green"))
 
     global cluster_info
-
 
     # 가상 머신이 생성되었는지 확인
     maas = subprocess.run(
         ["sudo", "maas", maas_info["maas_user"], "machines", "read"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
     ).stdout
 
-    maas = json.loads(maas).get("hostname", '')
+    maas = json.loads(maas).get("hostname", "")
 
     # cluster_info에서 maas_infos, nodes의 hostname 이 있는지 확인
     for node in nodes:
-        if maas.find(node.get("hostname", '')) != -1:
+        if maas.find(node.get("hostname", "")) != -1:
             print(f"Machine {node.get('hostname', '')} already created. Skipping...")
             continue
-
 
     maas_info = cluster_info.get("maas_infos", {})
     nodes = cluster_info.get("nodes", [])
 
     for node in nodes:
-        hostname = node.get("hostname", '')
+        hostname = node.get("hostname", "")
 
         # MAAS command execute
         maas_cmd = [
             "sudo",
-            "maas", 
+            "maas",
             maas_info["maas_user"],
             "vm-host",
             "compose",
             str(maas_info["machine_num"]),
             f"cores={maas_info['vm_cores']}",
             f"memory={maas_info['vm_memory']}",
-            f"hostname={hostname}"
+            f"hostname={hostname}",
         ]
 
         # Add storage if available
@@ -242,19 +233,23 @@ def maas_create_vm_machines():
 
         # Add boot-disk if available
         if "vm_boot_disk" in maas_info:
-            storage_sizes.append(str(maas_info['vm_boot_disk']))
+            storage_sizes.append(str(maas_info["vm_boot_disk"]))
 
         # Add storage if available
         if "vm_storage" in maas_info:
-            storage_sizes.extend([str(size['size']) for size in maas_info['vm_storage']])
+            storage_sizes.extend(
+                [str(size["size"]) for size in maas_info["vm_storage"]]
+            )
 
         # Join storage sizes with commas
-        storage_option = ','.join(storage_sizes)
+        storage_option = ",".join(storage_sizes)
 
         # Append storage option to maas_cmd
         maas_cmd.append(f"storage={storage_option}")
 
-        result = subprocess.run(maas_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        result = subprocess.run(
+            maas_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        )
         stdout = result.stdout
         stderr = result.stderr
 
@@ -275,35 +270,50 @@ def maas_create_vm_machines():
         else:
             print(f"Failed to create machine {hostname}. Error: {result.stderr}")
 
+
 def print_cluster_info():
     """
     클러스터 정보 출력 함수
     """
-    print(colored("#-print_cluster_info", 'green'))
+    print(colored("#-print_cluster_info", "green"))
 
     global cluster_info
-    cluster_name = cluster_info.get("cluster_name", '')
+    cluster_name = cluster_info.get("cluster_name", "")
     nodes = cluster_info.get("nodes", [])
 
     colume_length = 15
 
-    print(f"cluster_name =", colored(cluster_name.strip(), 'blue'))
-    print("hostname".ljust(colume_length), "ipmi_mac".ljust(colume_length), "ipmi_ip".ljust(colume_length), \
-            "eth_ip".ljust(colume_length), "ib_ip".ljust(colume_length), "ipmi_user".ljust(colume_length), \
-                "ipmi_pass".ljust(colume_length))
-        
-    for node in nodes:
-        hostname = node.get("hostname", '')
-        ipmi_mac = node.get("ipmi_mac", '')
-        ipmi_ip = node.get("ipmi_ip", '')
-        eth_ip = node.get("eth_ip", '')
-        ib_ip = node.get("ib_ip", '')
-        ipmi_user = node.get("ipmi_user", '')
-        ipmi_pass = node.get("ipmi_pass", '')
+    print(f"cluster_name =", colored(cluster_name.strip(), "blue"))
+    print(
+        "hostname".ljust(colume_length),
+        "ipmi_mac".ljust(colume_length),
+        "ipmi_ip".ljust(colume_length),
+        "eth_ip".ljust(colume_length),
+        "ib_ip".ljust(colume_length),
+        "ipmi_user".ljust(colume_length),
+        "ipmi_pass".ljust(colume_length),
+    )
 
-        tsv_data = "\t".join([hostname.ljust(colume_length), ipmi_mac.ljust(colume_length), ipmi_ip.ljust(colume_length), \
-            eth_ip.ljust(colume_length), ib_ip.ljust(colume_length), ipmi_user.ljust(colume_length), \
-                ipmi_pass.ljust(colume_length)])
+    for node in nodes:
+        hostname = node.get("hostname", "")
+        ipmi_mac = node.get("ipmi_mac", "")
+        ipmi_ip = node.get("ipmi_ip", "")
+        eth_ip = node.get("eth_ip", "")
+        ib_ip = node.get("ib_ip", "")
+        ipmi_user = node.get("ipmi_user", "")
+        ipmi_pass = node.get("ipmi_pass", "")
+
+        tsv_data = "\t".join(
+            [
+                hostname.ljust(colume_length),
+                ipmi_mac.ljust(colume_length),
+                ipmi_ip.ljust(colume_length),
+                eth_ip.ljust(colume_length),
+                ib_ip.ljust(colume_length),
+                ipmi_user.ljust(colume_length),
+                ipmi_pass.ljust(colume_length),
+            ]
+        )
 
         print(tsv_data)
 
@@ -312,10 +322,12 @@ def maas_login():
     """
     MAAS 로그인 함수
     """
-    print(colored("#-maas_login", 'green'))
+    print(colored("#-maas_login", "green"))
 
     client = maas.client.connect(
-        url='https://maas.falinux.dev:5443/MAAS/api/2.0/', apikey="Q56LqWPL9uSdLqr2AK:Meufe85jeWLnCNvUy2:s64qkn4R69Q8CauHqPBRcJBgC6GpMbGX")
+        url="https://maas.falinux.dev:5443/MAAS/api/2.0/",
+        apikey="Q56LqWPL9uSdLqr2AK:Meufe85jeWLnCNvUy2:s64qkn4R69Q8CauHqPBRcJBgC6GpMbGX",
+    )
 
     # get a reference to self.
     myself = client.users.whoami()
@@ -334,16 +346,15 @@ def maas_login():
     # allocate and deploy a machine
     # machine = client.machines.allocate()
 
-
     for machine in client.machines.list():
         print(repr(machine))
-    
+
     # for devices in client.devices.list():
     #     print(repr(devices))
-    
+
     # for rack_controller in client.rack_controllers.list():
     #     print(repr(rack_controller))
-    
+
     # for region_controller in client.region_controllers.list():
     #     print(repr(region_controller))
 
@@ -353,7 +364,6 @@ def maas_login():
     # for fabric in client.fabrics.list():
     #     print(repr(fabric))
 
-
     # get a machine from its system_id
     # machine = client.machine.get(system_id="nmfw7h")
 
@@ -362,10 +372,8 @@ def maas_login():
     machine.save()
 
 
-if __name__ == "__main__":
-    print(colored("#-main", 'green'))
-    config_file = "config/cluster-vm.json"
-
+def maas_login():
+    print(colored("#-maas_login", "green"))
 
     # MAAS 서버에 로그인
     maas_url = "https://maas.falinux.dev:5443/MAAS/api/2.0/"
@@ -376,7 +384,7 @@ if __name__ == "__main__":
         ["pass", "show", "falinux-pass"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
     )
 
     falinux_pass = falinux_pass.stdout.strip()
@@ -388,52 +396,99 @@ if __name__ == "__main__":
 
     maas_client = login(maas_url, username=maas_username, password=maas_password)
 
+    return maas_client
+
+
+def get_maas_info_nodes():
+    print(colored("#-get_maas_info_nodes", "green"))
+
+    maas_client = maas_login()
+
     # 현재 MAAS 서버에 등록된 노드 목록 가져오기
     nodes = maas_client.machines.list()
 
-    # 노드 목록 출력
     for node in nodes:
-        # print(f"Hostname: {node.hostname}")
-        # print(f"System ID: {node.system_id}")
-        # print(f"Status: {NodeStatus(node.status).name}")
-        if node.status == NodeStatus.READY.value:
-            print(f"Hostname: {node.hostname}")
-            machine = maas_client.machines.get(node.system_id)
-            machine.deploy()
-        if node.status == NodeStatus.ALLOCATED.value:
-            machine = maas_client.machines.get(node.system_id)
-            machine.deploy()
+        print(f"Hostname: {node.hostname}")
+
+    return nodes
 
 
+def get_cluster_info_nodes():
+    print(colored("#-get_cluster_info_nodes", "green"))
 
-    # # 특정 노드의 상태 변경 (예: 배포 준비 상태로 변경)
-    # node_id_to_deploy = "your-node-id-to-deploy"
-    # node_to_deploy = maas_client.nodes.get(node_id_to_deploy)
-    # if node_to_deploy:
-    #     if node_to_deploy.status != NodeStatus.READY.value:
-    #         print(f"Changing the status of Node {node_id_to_deploy} to READY")
-    #         node_to_deploy.start()
-    #     else:
-    #         print(f"Node {node_id_to_deploy} is already in READY status.")
-    # else:
-    #     print(f"Node with ID {node_id_to_deploy} not found.")
+    global cluster_info
 
-    # # 노드 목록 다시 출력하여 변경된 상태 확인
-    # nodes = maas_client.nodes.list()
-    # for node in nodes:
-    #     print(f"Node ID: {node.resource_id}")
-    #     print(f"Status: {NodeStatus(node.status).name}")
-    #     print("------")
+    nodes = cluster_info.get("nodes", [])
+
+    for node in nodes:
+        print(f"Hostname: {node.get('hostname', '')}")
+
+    return nodes
 
 
-    # get_cluster_info(config_file)
+def create_maas_vm_machine(cluster_info_nodes, maas_info_nodes):
+    print(colored("#-create_maas_vm_machine", "green"))
 
-    # print_cluster_info()
+    for cluster_info_node in cluster_info_nodes:
+        cluster_hostname = cluster_info_node.get("hostname", "")
+        fount = False
+        # print(f"cluster_hostname: {cluster_hostname}")
 
-    # maas_login()
+        for maas_info_node in maas_info_nodes:
+            maas_hostname = maas_info_node.hostname
+            if maas_hostname == cluster_hostname:
+                # print(f"Machine {cluster_hostname} already created. Skipping...")
+                fount = True
+                break
 
-    # get_maas_machine_info()
+        if not fount:
+            print(f"Machine {cluster_hostname} not created. Create...")
+            # maas_create_vm_machines()
+            maas_cmd = [
+                "sudo",
+                "maas",
+                cluster_info_node["maas_user"],
+                "vm-host",
+                "compose",
+                str(
+                    cluster_info_node["vm_machine_num"]
+                ),  # 수정: "machine_num" 대신 "vm_machine_num" 사용
+                f"cores={cluster_info_node['vm_cores']}",
+                f"memory={cluster_info_node['vm_memory']}",
+                f"hostname={cluster_info_node['hostname']}",  # 수정: "hostname"에 대한 키 접근을 수정
+            ]
 
-    # maas_create_vm_machines()
+            # Add storage if available
+            storage_sizes = []
 
-    # maas_deploy_machine()
+            # Add boot-disk if available
+            if "vm_boot_disk" in cluster_info_node:
+                storage_sizes.append(str(cluster_info_node["vm_boot_disk"]))
+
+            # Add storage if available
+            if "vm_storage" in cluster_info_node:
+                storage_sizes.extend(
+                    [str(size["size"]) for size in cluster_info_node["vm_storage"]]
+                )
+
+                ## # Join storage sizes with commas
+            storage_option = ",".join(storage_sizes)
+
+            # # Append storage option to maas_cmd
+            maas_cmd.append(f"storage={storage_option}")
+
+            result = subprocess.run(
+                maas_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            )
+
+
+if __name__ == "__main__":
+    print(colored("#-main", "green"))
+    config_file = "config/cluster-vm.json"
+
+    get_cluster_info(config_file)
+
+    cluster_info_nodes = get_cluster_info_nodes()
+    maas_info_nodes = get_maas_info_nodes()
+
+    create_maas_vm_machine(cluster_info_nodes, maas_info_nodes)
