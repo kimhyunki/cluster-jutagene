@@ -1,11 +1,19 @@
 import json
-import subprocess
+from os import close, read
 import time
+import getpass
+import subprocess
 from termcolor import colored
+
+from tqdm import tqdm
 
 import maas.client
 from maas.client import login
-import getpass
+from maas.client.enum import NodeStatus
+from maas.client.enum import LinkMode
+from maas.client.utils.maas_async import asynchronous
+
+import asyncio
 
 # https://maas.github.io/python-libmaas/
 
@@ -318,7 +326,7 @@ def print_cluster_info():
         print(tsv_data)
 
 
-def maas_login():
+def _maas_login():
     """
     MAAS 로그인 함수
     """
@@ -482,6 +490,71 @@ def create_maas_vm_machine(cluster_info_nodes, maas_info_nodes):
             )
 
 
+async def deploy_maas_vm_machine(cluster_info_nodes, maas_info_nodes):
+    print(colored("#-deploy_maas_vm_machine", "green"))
+
+    # MAAS 서버에 로그인
+    maas_url = "https://maas.falinux.dev:5443/MAAS/api/2.0/"
+    maas_username = "falinux"
+
+    # pass show falinux-pass is not null
+    falinux_pass = subprocess.run(
+        ["pass", "show", "falinux-pass"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+
+    falinux_pass = falinux_pass.stdout.strip()
+
+    if falinux_pass:
+        maas_password = falinux_pass
+    else:
+        maas_password = getpass.getpass("Enter MAAS password: ")
+
+    client = await login(maas_url, username=maas_username, password=maas_password)
+
+
+    all_machine = await client.machines.list()
+    ready_machine = [
+        machine for machine in all_machine if machine.status == NodeStatus.READY
+    ]
+
+    # tqdm: progress bar
+    progress_bar = tqdm(total=len(cluster_info_nodes))
+
+    # wiat for until all machine are READY
+    print(colored("wiat for until all machine are ready", "blue"))
+    while (len(ready_machine)) > 0:
+        await asyncio.sleep(5)
+        for machine in ready_machine:
+            if machine.status in [NodeStatus.COMMISSIONING, NodeStatus.TESTING]:
+                continue
+            elif machine.status == NodeStatus.READY:
+                # print(f"Machine {machine.hostname} is ready. Deploying...")
+                await machine.deploy()
+                ready_machine.remove(machine)
+                progress_bar.update(1)
+
+    deployed_machine = [
+        machine for machine in all_machine if machine.status == NodeStatus.DEPLOYED
+    ]
+
+    # wait for until all machine are deployed
+    print(colored("wait for until all machine are deployed", "blue"))
+    progress_bar = tqdm(total=len(deployed_machine))
+    while (len(deployed_machine)) > 0:
+        await asyncio.sleep(5)
+        for machine in deployed_machine:
+            await machine.refresh()
+            if machine.status in [NodeStatus.COMMISSIONING, NodeStatus.TESTING]:
+                continue
+            elif machine.status == NodeStatus.DEPLOYED:
+                # print(f"Machine {machine.hostname} is deployed.")
+                deployed_machine.remove(machine)
+                progress_bar.update(1)
+
+
 if __name__ == "__main__":
     print(colored("#-main", "green"))
     config_file = "config/cluster-vm.json"
@@ -492,3 +565,6 @@ if __name__ == "__main__":
     maas_info_nodes = get_maas_info_nodes()
 
     create_maas_vm_machine(cluster_info_nodes, maas_info_nodes)
+
+    # asyncio.run()을 사용하여 비동기 코드 실행
+    asyncio.run(deploy_maas_vm_machine(cluster_info_nodes, maas_info_nodes))
