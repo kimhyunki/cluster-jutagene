@@ -1,0 +1,8 @@
+# kustomization.yaml
+namespace: redmine
+resources:
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+  - cronjob-postgresql-backup.yaml
+    #  - pvc.yaml

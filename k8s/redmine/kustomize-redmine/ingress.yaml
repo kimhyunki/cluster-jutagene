@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: redmine
+  namespace: redmine
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 1G
+spec:
+  tls:
+  - hosts:
+    - rm.falinux.dev
+    secretName: rm-falinux-dev-tls
+  rules:
+  - host: rm.falinux.dev
+    http:
+      paths:
+      - backend:
+          serviceName: redmine
+          servicePort: 80
+        path: /

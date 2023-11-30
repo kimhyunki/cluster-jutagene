@@ -1,0 +1,29 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: postgresql-backup
+  namespace: redmine
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: redmine-cronjob
+            image: docker.falinux.dev/services/falinux-redmine:latest
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/sh
+            - -c
+            - pg_dump -U falinux -h postgresql -Fc falinux-redmine -f /mnt/`date +%Y-%m-%d`-postgresql-backup.tar
+            volumeMounts:
+              - mountPath: /mnt
+                name: app-persistent-storage
+          restartPolicy: OnFailure
+          imagePullSecrets:
+          - name: falinux-docker-registry
+          volumes:
+            - name: app-persistent-storage
+              persistentVolumeClaim:
+                claimName: rm-app-pvc

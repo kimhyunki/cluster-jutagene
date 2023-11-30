@@ -1,0 +1,63 @@
+#
+# 이 파일은 도커를 관리하는 파일입니다.
+#
+version: '2'
+services:
+    falinux-service-redmine:
+        build:
+            context     : ./deployment-redmine
+            dockerfile  : Dockerfile
+        image           : services/falinux-redmine:latest
+
+    falinux-service-redmine-postgresql:
+        build:
+            context     : ./deployment-postgresql
+            dockerfile  : Dockerfile
+        image           : services/falinux-redmine-postgresql:latest
+
+    falinux-service-redmine-local:
+        image: services/falinux-redmine:latest
+        ports:
+        - "3000:3000"
+        links:
+        - falinux-service-redmine-postgresql-local:postgresql
+        depends_on:
+            - falinux-service-redmine-postgresql-local
+        environment:
+            - ALLOW_EMPTY_PASSWORD=yes
+            - REDMINE_DATABASE_TYPE=postgresql
+            - REDMINE_DATABASE_HOST=postgresql
+            - REDMINE_DATABASE_PORT_NUMBER=5432
+            - REDMINE_DATABASE_USER=falinux
+            - REDMINE_DATABASE_NAME=falinux-redmine
+            - REDMINE_DATABASE_PASSWORD=2001May09
+            - REDMINE_USER=falinux
+            - REDMINE_PASSWORD=2001May09
+        volumes:
+        - redmine_data:${pwd}/redmine_data
+        networks:
+            - falinux-redmine-networks
+
+    falinux-service-redmine-postgresql-local:
+        image: services/falinux-redmine-postgresql:latest
+        ports:
+            - "5432:5432"
+        environment:
+            - ALLOW_EMPTY_PASSWORD=yes
+            - POSTGRESQL_USERNAME=falinux
+            - POSTGRESQL_DATABASE=falinux-redmine
+            - POSTGRESQL_PASSWORD=2001May09
+        volumes:
+        - postgres_data:${pwd}/postgres_data
+        networks:
+            - falinux-redmine-networks
+
+networks:
+  falinux-redmine-networks:
+    driver: bridge
+
+volumes:
+  redmine_data:
+    driver: local
+  postgres_data:
+    driver: local

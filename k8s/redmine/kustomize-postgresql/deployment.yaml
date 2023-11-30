@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql
+  namespace: redmine
+spec:
+  selector:
+    matchLabels:
+      component: postgresql
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        component: postgresql
+    spec:
+      containers:
+      - name: postgresql
+        image: docker.falinux.dev/services/falinux-redmine-postgresql:latest
+        env:
+        - name: ALLOW_EMPTY_PASSWORD
+          value: "yes"
+        - name: POSTGRESQL_USERNAME
+          value: "falinux"
+        - name: POSTGRESQL_DATABASE
+          value: "falinux-redmine"
+        imagePullPolicy: Always
+        resources:
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+        stdin: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        tty: true
+        volumeMounts:
+          - mountPath: /bitnami/postgresql
+            name: rm-postgresql-app-pv
+          - mountPath: /mnt
+            name: rm-app-pv
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: falinux-docker-registry
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: rm-postgresql-app-pv
+          persistentVolumeClaim:
+            claimName: rm-postgresql-app-pvc
+        - name: rm-app-pv
+          persistentVolumeClaim:
+            claimName: rm-app-pvc
