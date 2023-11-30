@@ -1,0 +1,83 @@
+{
+    "cluster_name": "b",
+    "node_count": 5,
+    "node_config": {
+        "instance_type": "t2.micro",
+        "region": "us-east-1"
+    },
+    "services": [
+        "web",
+        "database",
+        "worker"
+    ],
+    "maas_infos": {
+        "maas_url": "https://maas.falinux.dev:5443/MAAS/api/2.0/",
+        "maas_user": "falinux",
+        "maas_pass": ""
+    },
+    "nodes": [
+        {
+            "hostname": "r102-vm00",
+            "ipmi_mac": "xxxx",
+            "ipmi_ip": "xxxx",
+            "eth_ip": "10.10.100.90",
+            "eth_interface": "enp5s0",
+            "eth_subnet": "10.10.100.0/24",
+            "ib_ip": "xxxx",
+            "ipmi_user": "root",
+            "ipmi_pass": "xxxxx",
+            "maas_user": "falinux",
+            "vm_machine_num": 567,
+            "vm_cores": 8,
+            "vm_memory": 32768,
+            "vm_boot_disk": 30,
+            "vm_storage": [
+                {
+                    "size": 50
+                }
+            ]
+        },
+        {
+            "hostname": "r309-vm01",
+            "ipmi_mac": "xxxx",
+            "ipmi_ip": "xxxx",
+            "eth_ip": "10.10.100.91",
+            "eth_interface": "enp5s0",
+            "eth_subnet": "10.10.100.0/24",
+            "ib_ip": "xxxx",
+            "ipmi_user": "root",
+            "ipmi_pass": "xxxxx",
+            "maas_user": "falinux",
+            "vm_machine_num": 566,
+            "vm_cores": 8,
+            "vm_memory": 32768,
+            "vm_boot_disk": 30,
+            "vm_storage": [
+                {
+                    "size": 50
+                }
+            ]
+        },
+        {
+            "hostname": "r207-vm02",
+            "ipmi_mac": "yyyy",
+            "ipmi_ip": "yyyy",
+            "eth_ip": "10.10.100.92",
+            "eth_interface": "enp5s0",
+            "eth_subnet": "10.10.100.0/24",
+            "ib_ip": "yyyy",
+            "ipmi_user": "root",
+            "ipmi_pass": "yyyyy",
+            "maas_user": "falinux",
+            "vm_machine_num": 565,
+            "vm_cores": 8,
+            "vm_memory": 32768,
+            "vm_boot_disk": 30,
+            "vm_storage": [
+                {
+                    "size": 50
+                }
+            ]
+        }
+    ]
+}
