@@ -440,10 +440,11 @@ function k8s_setting() {
   rancher_select_cluster
   k8s_install_metallb
   k8s_install_certmanager
+  sleep 60
   k8s_install_rancher_demo
   k8s_install_glusterfs
-  k8s_install_gitlab
-  k8s_install_docker_registry
+  # k8s_install_gitlab
+  # k8s_install_docker_registry
   # k8s_uninstall_metallb
   # k8s_unnstall_rancher_demo
   # k8s_uninstall_gitlab
@@ -890,7 +891,7 @@ function main() {
   #-------------------------------------------------------------------------------
   # 잘 동작하는 셋
   pandora_machines_info_split
-  maas_setting
+  # maas_setting
   install_docker
   rancher_setting
   k8s_setting
