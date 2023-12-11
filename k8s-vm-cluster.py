@@ -218,7 +218,7 @@ async def deploy_maas_vm_machine(cluster_info_nodes, maas_info_nodes):
 
     all_machine = await client.machines.list()
     ready_machine = [
-        machine for machine in all_machine if machine.status == NodeStatus.COMMISSIONING
+        machine for machine in all_machine if machine.status in [NodeStatus.READY, NodeStatus.COMMISSIONING]
     ]
 
     # wiat for until all machine are READY
@@ -302,7 +302,7 @@ async def deploy_maas_vm_machine(cluster_info_nodes, maas_info_nodes):
 
 if __name__ == "__main__":
     print(colored("#-main", "green"))
-    config_file = "config/cluster-vm.json"
+    config_file = "config/cluster-vm-rancher.json"
 
     get_cluster_info(config_file)
 
