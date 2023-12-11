@@ -1,0 +1,31 @@
+#
+# This example is for Kubernetes running an nginx-ingress
+# and an ACME (e.g. Let's Encrypt) certificate service
+#
+# The nginx-ingress annotations support the dashboard
+# running using HTTPS with a self-signed certificate
+#
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: rook-ceph-mrg-dashboard
+  namespace: rook-ceph
+  annotations:
+      kubernetes.io/tls-acme: "true"
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      nginx.ingress.kubernetes.io/server-snippet: |
+       proxy_ssl_verify off;
+spec:
+  ingressClassName: "nginx"
+  tls:
+  - hosts:
+    - ceph.juxtagene.com
+    secretName: ceph-juxtagene-com-tls
+  rules:
+  - host: ceph.juxtagene.com
+    http:
+      paths:
+      - backend:
+          serviceName: rook-ceph-mgr-dashboard
+          servicePort: 8443
+        path: /

@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: cehp-juxtagene-com
+  namespace: rook-ceph
+spec:
+  secretName: ceph-juxtagene-com-tls
+  issuerRef:
+    name: letsencrypt-prod
+  commonName: ceph.juxtagene.com
+  dnsNames:
+  - ceph.juxtagene.com
