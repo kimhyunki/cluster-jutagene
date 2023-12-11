@@ -36,9 +36,9 @@ RANCHER_BIN="${RANCHER_PATH}rancher"
 # arrays
 # hostname, ipmi mac, ipmi ip, eth ip, ib ip, ipmi user, ipmi pass
 declare -a pandora_machines_info=(
-  "vm00" "xxxx" "xxxx" "10.10.100.90" "xxxx" "root" "xxxxx"
-  "vm01" "xxxx" "xxxx" "10.10.100.91" "xxxx" "root" "xxxxx"
-  "vm02" "xxxx" "xxxx" "10.10.100.92" "xxxx" "root" "xxxxx"
+  "r102-rancher-vm00" "xxxx" "xxxx" "10.10.100.80" "xxxx" "root" "xxxxx"
+  "r309-rancher-vm01" "xxxx" "xxxx" "10.10.100.81" "xxxx" "root" "xxxxx"
+  "r207-rancher-vm02" "xxxx" "xxxx" "10.10.100.82" "xxxx" "root" "xxxxx"
 )
 
 declare -a array_pandora_machine_name=()
@@ -435,14 +435,82 @@ rancher_select_cluster() {
   done
 }
 
+function k8s_install_ceph() {
+  msg "${GREEN}#-k8s_install_ceph${NOFORMAT}" 
+
+
+  #001
+  msg "\t${BLUE}##-001${NOFORMAT}"
+  $RANCHER_BIN kubectl apply -f k8s/ceph/rook/crds.yaml
+  $RANCHER_BIN kubectl apply -f k8s/ceph/rook/common.yaml
+  $RANCHER_BIN kubectl apply -f k8s/ceph/rook/operator.yaml
+
+  #002
+  msg "\t${BLUE}##-002${NOFORMAT}"
+  $RANCHER_BIN kubectl apply -f k8s/ceph/rook/cluster.yaml
+
+  #003
+  msg "\t${BLUE}##-003${NOFORMAT}"
+  $RANCHER_BIN kubectl apply -f k8s/ceph/rook/toolbox.yaml
+
+  #004
+  msg "\t${BLUE}##-004${NOFORMAT}"
+  $RANCHER_BIN kubectl apply -f k8s/ceph/rook/csi/rbd/storageclass.yaml
+
+  #005
+  msg "\t${BLUE}##-005${NOFORMAT}"
+  $RANCHER_BIN kubectl apply -f k8s/ceph/rook/filesystem.yaml
+  $RANCHER_BIN kubectl apply -f k8s/ceph/rook/csi/cephfs/storageclass.yaml
+
+  #006
+  msg "\t${BLUE}##-006${NOFORMAT}"
+  $RANCHER_BIN kubectl patch storageclass rook-ceph-block \
+    -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+
+  $RANCHER_BIN kubectl patch storageclass rook-cephfs \
+    -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+
+  #007
+  msg "\t${BLUE}##-007${NOFORMAT}"
+  $RANCHER_BIN kubectl apply -f https://raw.githubusercontent.com/coreos/prometheus-operator/v0.40.0/bundle.yaml
+
+  #008
+  msg "\t${BLUE}##-008${NOFORMAT}"
+  $RANCHER_BIN kubectl apply -f k8s/ceph/rook/monitoring/service-monitor.yaml
+  $RANCHER_BIN kubectl apply -f k8s/ceph/rook/monitoring/prometheus.yaml
+  $RANCHER_BIN kubectl apply -f k8s/ceph/rook/monitoring/prometheus-service.yaml
+
+  #009
+  msg "\t${BLUE}##-009${NOFORMAT}"
+  $RANCHER_BIN kubectl  apply -f k8s/ceph/rook/issuer.yaml
+  $RANCHER_BIN kubectl  apply -f k8s/ceph/rook/cert.yaml
+  $RANCHER_BIN kubectl  apply -f k8s/ceph/rook/dashboard-ingress-https.yaml
+#  $RANCHER_BIN kubectl -n rook-ceph get secret rook-ceph-dashboard-password -o jsonpath="{['data']['password']}" | base64 --decode && echo
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
 function k8s_setting() {
   # sleep 20
   rancher_select_cluster
-  k8s_install_metallb
+  # k8s_install_metallb
   k8s_install_certmanager
   sleep 60
   k8s_install_rancher_demo
-  k8s_install_glusterfs
+  k8s_install_ceph
+
+
+  # k8s_install_glusterfs
   # k8s_install_gitlab
   # k8s_install_docker_registry
   # k8s_uninstall_metallb
