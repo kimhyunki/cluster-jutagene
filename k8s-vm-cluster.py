@@ -221,6 +221,19 @@ async def deploy_maas_vm_machine(cluster_info_nodes, maas_info_nodes):
         machine for machine in all_machine if machine.status in [NodeStatus.READY, NodeStatus.COMMISSIONING]
     ]
 
+    # print (f"ready_machine: {ready_machine}")
+
+    # ready_machine 에 cluster_info_nodes 의 hostname 과 machine.hostname 이 같은 경우만 남긴다.
+    ready_machine = [
+        machine
+        for machine in ready_machine
+        for node in cluster_info_nodes
+        if machine.hostname == node.get("hostname", "")
+    ]
+
+    # print (f"ready_machine: {ready_machine}")
+
+
     # wiat for until all machine are READY
     print(colored("wiat for until all machine are ready", "blue"))
 
