@@ -15,10 +15,93 @@ from maas.client.utils.maas_async import asynchronous
 
 import asyncio
 
+from fabric import Connection
+
+import rancher
+
 # https://maas.github.io/python-libmaas/
+# https://github.com/rancher/client-python
 
 cluster_info = {}
 machine_to_system_id = {}  # 머신 이름을 시스템 ID로 매핑하는 딕셔너리
+
+
+def rancher_login():
+    print(colored("#-rancher_login", "green"))
+
+    # pass show falinux-pass is not null
+    access_key = subprocess.run(
+        ["pass", "show", "rancher-access-key"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+
+    access_key = access_key.stdout.strip()
+
+    secret_key = subprocess.run(
+        ["pass", "show", "rancher-secret-key"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+
+    secret_key = secret_key.stdout.strip()
+
+    client = rancher.Client(
+        access_key=access_key,
+        secret_key=secret_key,
+        url="https://rancher.falinux.dev/v3",
+    )
+
+    # curl -s https://localhost:8443/v3/users?me=true
+    client.list_user(me="true")
+
+    # curl -s -X POST https://localhost:8443/v3/users -H 'Content-Type: application/json' -d '{ "username" : "user1", "password": "Password1" }'
+    # client.create_user(username="user1", password="Password1")
+
+    # curl -s -X PUT https://localhost:8443/v3/users/user-xyz123 -H 'Content-Type: application/json' -d '{ "description" : "A user" }'
+    # user = client.by_id_user("user-xyz123")
+    # client.update(user, description="A user")
+
+    # curl -s -X DELETE https://localhost:8443/v3/users/user-xyz123
+    # user = client.by_id_user("user-xyz123")
+    # client.delete(user)
+
+    # Links
+    # curl -s https://localhost:8443/v3/clusterRoleTemplateBindings?userId=user-xyz123
+    # user = client.by_id_user("user-xyz123")
+    # user.clusterRoleTemplateBindings()
+
+
+def install_docker(cluster_info_nodes):
+    print(colored("#-install_docker", "green"))
+
+    for node in cluster_info_nodes:
+        hostname = node.get("hostname", "")
+        eth_ip = node.get("eth_ip", "")
+        ipmi_ip = node.get("ipmi_ip", "")
+        ipmi_user = node.get("ipmi_user", "")
+        ssh_user = node.get("ssh_user", "")
+
+        print(f"\teth_ip: {eth_ip}")
+        print(f"\tssh_user: {ssh_user}")
+
+        # fabric connection
+        c = Connection(
+            host=eth_ip,
+            user=ssh_user,
+            connect_kwargs={
+                "key_filename": "/home/falinux/.ssh/id_rsa",
+            },
+        )
+
+        c.sudo("systemctl stop ufw")
+        c.sudo("systemctl disable ufw")
+        c.sudo("curl -ksfsSL https://get.docker.com | sh")
+        c.sudo(f"usermod -aG docker {ssh_user}")
+        c.sudo("systemctl enable docker")
+        c.sudo("systemctl start docker")
 
 
 def get_cluster_info(cluster_config_file):
@@ -218,7 +301,9 @@ async def deploy_maas_vm_machine(cluster_info_nodes, maas_info_nodes):
 
     all_machine = await client.machines.list()
     ready_machine = [
-        machine for machine in all_machine if machine.status in [NodeStatus.READY, NodeStatus.COMMISSIONING]
+        machine
+        for machine in all_machine
+        if machine.status in [NodeStatus.READY, NodeStatus.COMMISSIONING]
     ]
 
     # print (f"ready_machine: {ready_machine}")
@@ -232,7 +317,6 @@ async def deploy_maas_vm_machine(cluster_info_nodes, maas_info_nodes):
     ]
 
     # print (f"ready_machine: {ready_machine}")
-
 
     # wiat for until all machine are READY
     print(colored("wiat for until all machine are ready", "blue"))
@@ -315,7 +399,7 @@ async def deploy_maas_vm_machine(cluster_info_nodes, maas_info_nodes):
 
 if __name__ == "__main__":
     print(colored("#-main", "green"))
-    config_file = "config/cluster-vm-rancher.json"
+    config_file = "config/cluster-vm-test.json"
 
     get_cluster_info(config_file)
 
@@ -326,3 +410,7 @@ if __name__ == "__main__":
 
     # asyncio.run()을 사용하여 비동기 코드 실행
     asyncio.run(deploy_maas_vm_machine(cluster_info_nodes, maas_info_nodes))
+
+    # install_docker(cluster_info_nodes)
+
+    rancher_login()
