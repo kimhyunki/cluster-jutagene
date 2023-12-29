@@ -411,6 +411,6 @@ if __name__ == "__main__":
     # asyncio.run()을 사용하여 비동기 코드 실행
     asyncio.run(deploy_maas_vm_machine(cluster_info_nodes, maas_info_nodes))
 
-    # install_docker(cluster_info_nodes)
+    install_docker(cluster_info_nodes)
 
     rancher_login()
