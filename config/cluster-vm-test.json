@@ -1,0 +1,86 @@
+{
+    "cluster_name": "test",
+    "node_count": 5,
+    "node_config": {
+        "instance_type": "t2.micro",
+        "region": "us-east-1"
+    },
+    "services": [
+        "web",
+        "database",
+        "worker"
+    ],
+    "maas_infos": {
+        "maas_url": "https://maas.falinux.dev:5443/MAAS/api/2.0/",
+        "maas_user": "falinux",
+        "maas_pass": ""
+    },
+    "nodes": [
+        {
+            "hostname": "r103-test-vm00",
+            "ssh_user": "ubuntu",
+            "ipmi_mac": "xxxx",
+            "ipmi_ip": "xxxx",
+            "eth_ip": "10.10.100.100",
+            "eth_interface": "enp5s0",
+            "eth_subnet": "10.10.100.0/24",
+            "ib_ip": "xxxx",
+            "ipmi_user": "root",
+            "ipmi_pass": "xxxxx",
+            "maas_user": "falinux",
+            "vm_machine_num": 570,
+            "vm_cores": 8,
+            "vm_memory": 32768,
+            "vm_boot_disk": 30,
+            "vm_storage": [
+                {
+                    "size": 50
+                }
+            ]
+        },
+        {
+            "hostname": "r207-test-vm02",
+            "ssh_user": "ubuntu",
+            "ipmi_mac": "yyyy",
+            "ipmi_ip": "yyyy",
+            "eth_ip": "10.10.100.102",
+            "eth_interface": "enp5s0",
+            "eth_subnet": "10.10.100.0/24",
+            "ib_ip": "yyyy",
+            "ipmi_user": "root",
+            "ipmi_pass": "yyyyy",
+            "maas_user": "falinux",
+            "vm_machine_num": 565,
+            "vm_cores": 8,
+            "vm_memory": 32768,
+            "vm_boot_disk": 30,
+            "vm_storage": [
+                {
+                    "size": 50
+                }
+            ]
+        },
+        {
+            "hostname": "r309-test-vm01",
+            "ssh_user": "ubuntu",
+            "ipmi_mac": "xxxx",
+            "ipmi_ip": "xxxx",
+            "eth_ip": "10.10.100.101",
+            "eth_interface": "enp5s0",
+            "eth_subnet": "10.10.100.0/24",
+            "ib_ip": "xxxx",
+            "ipmi_user": "root",
+            "ipmi_pass": "xxxxx",
+            "maas_user": "falinux",
+            "vm_machine_num": 566,
+            "vm_cores": 8,
+            "vm_memory": 32768,
+            "vm_boot_disk": 30,
+            "vm_storage": [
+                {
+                    "size": 50
+                }
+            ]
+        }
+    ]
+}
