@@ -1,0 +1,57 @@
+{
+    "clusters": [
+      {
+        "nodes": [
+          {
+            "node": {
+              "hostnames": {
+                "manage": [
+                  "r103-clone-vm00"
+                ],
+                "storage": [
+                  "10.10.100.110"
+                ]
+              },
+              "zone": 1
+            },
+            "devices": [
+              "/dev/sdb"
+            ]
+          },
+          {
+            "node": {
+              "hostnames": {
+                "manage": [
+                  "r207-clone-vm01"
+                ],
+                "storage": [
+                  "10.10.100.111"
+                ]
+              },
+              "zone": 1
+            },
+            "devices": [
+              "/dev/sdb"
+            ]
+          },
+          {
+            "node": {
+              "hostnames": {
+                "manage": [
+                  "r309-clone-vm02"
+                ],
+                "storage": [
+                  "10.10.100.112"
+                ]
+              },
+              "zone": 1
+            },
+            "devices": [
+              "/dev/sdb"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  
